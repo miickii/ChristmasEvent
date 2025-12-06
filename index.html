@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GuestPass Event</title>
-    <meta name="theme-color" content="#2563eb">
+    <title>Christmas Event</title>
+    <meta name="theme-color" content="#d42f2f">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://placehold.co/192x192/2563eb/white?text=GP">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/d42f2f/white?text=XMAS">
     
     <!-- Libraries for QR Generation and Scanning -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -14,21 +14,22 @@
 
     <style>
         :root {
-            --primary: #2563eb; /* Brand Blue */
-            --dark: #1e293b;
-            --danger: #ef4444;
-            --success: #22c55e;
-            --bg: #f8fafc;
+            /* Christmas Theme Colors */
+            --primary: #d42f2f;      /* Christmas Red */
+            --primary-dark: #991b1b;
+            --gold: #f59e0b;         /* Gold Accent */
+            --green: #15803d;        /* Holly Green */
+            --bg: #fdf2f2;           /* Very light red tint bg */
             --card: #ffffff;
-            --text: #334155;
+            --text: #1e293b;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
 
         /* Navigation */
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; padding: 10px 0 30px 0; z-index: 1000; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
-        .nav-btn { background: none; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; color: #94a3b8; width: 50%; font-weight: 500; letter-spacing: 0.5px; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid #fee2e2; display: flex; justify-content: space-around; padding: 10px 0 30px 0; z-index: 1000; box-shadow: 0 -4px 20px rgba(212, 47, 47, 0.1); }
+        .nav-btn { background: none; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; color: #9ca3af; width: 50%; font-weight: 500; }
         .nav-btn.active { color: var(--primary); }
         .nav-icon { font-size: 24px; margin-bottom: 4px; }
 
@@ -39,59 +40,66 @@
 
         /* Header */
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-top: 10px; }
-        h1 { margin: 0; font-size: 28px; letter-spacing: -0.5px; color: var(--dark); }
-        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: transform 0.1s; }
+        h1 { margin: 0; font-size: 26px; color: var(--primary-dark); letter-spacing: -0.5px; }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(212, 47, 47, 0.4); transition: transform 0.1s; }
         .btn-add:active { transform: scale(0.95); }
 
         /* Guest List */
-        .guest-card { background: var(--card); padding: 16px 20px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid transparent; transition: background 0.2s; }
-        .guest-card:active { background: #f1f5f9; }
-        .guest-info h3 { margin: 0 0 4px 0; font-size: 17px; color: var(--dark); }
-        .guest-info p { margin: 0; font-size: 13px; color: #94a3b8; font-family: monospace; letter-spacing: 0.5px; }
-        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .status-in { background: #dcfce7; color: #15803d; }
+        .guest-card { background: var(--card); padding: 16px 20px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-left: 4px solid transparent; transition: background 0.2s; }
+        .guest-card:active { background: #fff1f2; }
+        .guest-info h3 { margin: 0 0 4px 0; font-size: 17px; color: var(--text); }
+        .guest-info p { margin: 0; font-size: 13px; color: #94a3b8; font-family: monospace; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .status-in { background: #dcfce7; color: var(--green); }
         .status-out { background: #f1f5f9; color: #94a3b8; }
 
-        /* --- THE NEW TICKET STYLES --- */
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        /* --- CHRISTMAS TICKET STYLES --- */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
         .modal.open { display: flex; }
         
         .modal-scroll-container { width: 100%; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
 
-        /* The Official Ticket Card */
+        /* The Festive Ticket Card */
         .ticket-pass {
             background: white;
             width: 100%;
-            max-width: 340px;
-            border-radius: 20px;
+            max-width: 320px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             position: relative;
             margin-bottom: 25px;
             text-align: center;
         }
 
         .ticket-header {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            padding: 20px;
+            padding: 25px 20px;
             position: relative;
+            border-bottom: 4px solid var(--gold); /* Gold divider */
         }
-        .ticket-header h2 { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; }
+        /* Snowflake Decoration */
+        .ticket-header::after { content: '❄️'; position: absolute; top: 10px; right: 15px; font-size: 24px; opacity: 0.3; }
+        .ticket-header::before { content: '🎄'; position: absolute; top: 10px; left: 15px; font-size: 24px; opacity: 0.3; }
+
+        .ticket-header h2 { margin: 0; font-size: 22px; letter-spacing: 1px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         
         .ticket-body {
             padding: 30px 20px 20px 20px;
             background: white;
             position: relative;
+            background-image: radial-gradient(#f1f5f9 1px, transparent 1px);
+            background-size: 20px 20px; /* Subtle pattern */
         }
 
-        .guest-name-large { font-size: 24px; font-weight: 800; color: var(--dark); margin: 0 0 5px 0; line-height: 1.2; }
-        .guest-label { font-size: 12px; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 1px; margin-bottom: 20px; }
+        .guest-name-large { font-size: 26px; font-weight: 800; color: var(--text); margin: 0 0 5px 0; line-height: 1.2; }
+        .guest-label { font-size: 12px; text-transform: uppercase; color: var(--primary); font-weight: bold; letter-spacing: 1px; margin-bottom: 15px; opacity: 0.8; }
 
-        #qrcode { margin: 10px auto 20px auto; display: flex; justify-content: center; }
-        #qrcode img { display: block; } /* Remove border/shadow for cleaner look */
+        #qrcode { margin: 15px auto 20px auto; display: flex; justify-content: center; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: fit-content; border: 1px solid #f1f5f9; }
+        #qrcode img { display: block; }
 
-        .ticket-id-display { font-family: monospace; font-size: 16px; color: #64748b; letter-spacing: 2px; margin-bottom: 5px; background: #f8fafc; padding: 8px 15px; border-radius: 8px; display: inline-block; }
+        .ticket-id-display { font-family: monospace; font-size: 14px; color: #64748b; margin-bottom: 5px; background: #f8fafc; padding: 6px 12px; border-radius: 6px; display: inline-block; border: 1px dashed #cbd5e1; }
 
         /* Dashed Line / Tear-off effect */
         .ticket-divider {
@@ -100,41 +108,40 @@
             background: radial-gradient(circle, transparent 8px, #ffffff 8px) 0 0 / 24px 24px repeat-x,
                         linear-gradient(#f1f5f9 0%, #f1f5f9 100%);
             background-blend-mode: destination-out;
-            background-color: #f8fafc; /* Footer color */
+            background-color: #fdf2f2; /* Footer color matches bg */
             position: relative;
             margin-top: 10px;
         }
         /* Little notches on side */
         .ticket-pass::before, .ticket-pass::after {
-            content: ''; position: absolute; top: 68%; width: 20px; height: 20px; background: rgba(0,0,0,0.6); border-radius: 50%; z-index: 10;
+            content: ''; position: absolute; top: 68%; width: 20px; height: 20px; background: rgba(0,0,0,0.7); border-radius: 50%; z-index: 10;
         }
         .ticket-pass::before { left: -10px; }
         .ticket-pass::after { right: -10px; }
 
         .ticket-footer {
-            background: #f8fafc;
+            background: #fdf2f2;
             padding: 15px;
-            border-top: 2px dashed #cbd5e1;
+            border-top: 2px dashed #fca5a5;
         }
-        .ticket-footer p { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin: 0; }
-        .checkin-status-text { font-size: 12px; margin-top: 5px; font-weight: bold; }
+        .ticket-footer p { font-size: 11px; color: var(--primary-dark); font-weight: 600; margin: 0; opacity: 0.8; }
 
         /* Close Button (Floating outside) */
-        .close-modal-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 2002; display: flex; align-items: center; justify-content: center; color: var(--dark); }
+        .close-modal-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 2002; display: flex; align-items: center; justify-content: center; color: var(--text); }
 
         /* Action Buttons */
-        .modal-actions { width: 100%; max-width: 340px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-actions { width: 100%; max-width: 320px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; width: 100%; font-size: 14px; transition: transform 0.1s; }
         .btn:active { transform: scale(0.98); }
-        .btn-checkin { background: var(--success); color: white; grid-column: span 2; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
-        .btn-delete { background: white; color: var(--danger); border: 1px solid #fee2e2; }
-        .btn-edit { background: white; color: var(--dark); border: 1px solid #e2e8f0; }
+        .btn-checkin { background: var(--green); color: white; grid-column: span 2; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3); }
+        .btn-delete { background: white; color: var(--primary); border: 1px solid #fecaca; }
+        .btn-edit { background: white; color: var(--text); border: 1px solid #e2e8f0; }
 
         /* Edit Input Area */
-        .edit-container { background: white; padding: 20px; border-radius: 16px; margin-top: 15px; width: 100%; max-width: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: none; }
+        .edit-container { background: white; padding: 20px; border-radius: 16px; margin-top: 15px; width: 100%; max-width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: none; }
 
         /* Scanner */
-        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: black; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: black; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 4px solid var(--primary); }
         .scan-result { margin-top: 20px; padding: 15px; background: #dcfce7; border-radius: 12px; color: #14532d; text-align: center; display: none; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
         /* Inputs */
@@ -151,20 +158,20 @@
     <!-- NAV BAR -->
     <nav>
         <button class="nav-btn active" onclick="switchTab('list')">
-            <span class="nav-icon">📋</span>
-            <span>Guest List</span>
+            <span class="nav-icon">🎄</span>
+            <span>Guests</span>
         </button>
         <button class="nav-btn" onclick="switchTab('scan')">
             <span class="nav-icon">📷</span>
-            <span>Scanner</span>
+            <span>Scan</span>
         </button>
     </nav>
 
     <!-- GUEST LIST VIEW -->
     <div id="view-list" class="view active">
         <header>
-            <h1>Events <span id="count" style="font-size: 16px; color: #94a3b8; font-weight: normal; vertical-align: middle;">(0)</span></h1>
-            <button class="btn-add" onclick="openAddModal()">+ New Guest</button>
+            <h1>Christmas Party <span id="count" style="font-size: 16px; color: #94a3b8; font-weight: normal; vertical-align: middle;">(0)</span></h1>
+            <button class="btn-add" onclick="openAddModal()">+ Add Guest</button>
         </header>
         
         <input type="text" id="search" placeholder="Search name or ID..." onkeyup="renderGuests()">
@@ -173,9 +180,9 @@
         </div>
         
         <!-- Empty State -->
-        <div id="empty-state" style="text-align: center; margin-top: 50px; display: none; color: #94a3b8;">
-            <p style="font-size: 40px; margin-bottom: 10px;">🎟️</p>
-            <p>No guests yet.</p>
+        <div id="empty-state" style="text-align: center; margin-top: 50px; display: none; color: #cbd5e1;">
+            <p style="font-size: 50px; margin-bottom: 10px;">🎅</p>
+            <p>No guests added yet.</p>
         </div>
     </div>
 
@@ -193,7 +200,7 @@
         <button id="stop-scan-btn" class="btn" style="background:white; color: #64748b; margin-top:20px; display:none;" onclick="stopScanner()">Stop Camera</button>
     </div>
 
-    <!-- TICKET MODAL (THE NEW OFFICIAL LOOK) -->
+    <!-- TICKET MODAL (THE FESTIVE LOOK) -->
     <div id="ticket-modal" class="modal">
         <button class="close-modal-btn" onclick="closeModal('ticket-modal')">&times;</button>
         
@@ -201,23 +208,24 @@
             <!-- The Visual Ticket Card -->
             <div class="ticket-pass" id="ticket-visual">
                 <div class="ticket-header">
-                    <h2>Event Access Pass</h2>
+                    <h2>圣诞派对门票</h2> <!-- CHINESE TITLE -->
                 </div>
                 <div class="ticket-body">
-                    <div class="guest-label">Authorized Guest</div>
+                    <div class="guest-label">特邀嘉宾</div> <!-- Invited Guest -->
                     <div class="guest-name-large" id="t-name">Guest Name</div>
                     
                     <div id="qrcode"></div>
                     
+                    <div style="font-size:10px; color:#94a3b8; text-transform:uppercase;">入场码 (Entry Code)</div>
                     <div class="ticket-id-display" id="t-id">ID-000000</div>
                 </div>
                 <div class="ticket-footer">
                     <div id="t-status"></div>
-                    <p style="margin-top: 5px;">Admit One • Non-Transferable</p>
+                    <p style="margin-top: 5px;">一人一票 • 凭码入场</p> <!-- One person one ticket, entry by code -->
                 </div>
             </div>
 
-            <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom: 15px;">Screenshot the card above to send to guest.</p>
+            <p style="font-size:12px; color:rgba(255,255,255,0.8); margin-bottom: 15px;">请截图保存此门票</p>
 
             <!-- Actions -->
             <div class="modal-actions">
@@ -231,7 +239,7 @@
                 <h3 style="margin-top:0;">Update Name</h3>
                 <input type="text" id="edit-name-input">
                 <div style="display:flex; gap:10px;">
-                    <button class="btn" style="background:#e2e8f0; color:var(--dark);" onclick="cancelEdit()">Cancel</button>
+                    <button class="btn" style="background:#e2e8f0; color:var(--text);" onclick="cancelEdit()">Cancel</button>
                     <button class="btn" style="background:var(--primary); color:white;" onclick="saveEdit()">Save</button>
                 </div>
             </div>
@@ -242,8 +250,8 @@
     <div id="add-modal" class="modal">
         <div class="simple-modal-content">
             <button class="close-modal-btn" style="top: -15px; right: -15px;" onclick="closeModal('add-modal')">&times;</button>
-            <h2 style="margin-top:0;">Add Guest</h2>
-            <p style="color:#64748b; font-size: 14px; margin-bottom: 20px;">Enter the full name to generate a unique ticket.</p>
+            <h2 style="margin-top:0;">New Guest</h2>
+            <p style="color:#64748b; font-size: 14px; margin-bottom: 20px;">Enter guest name to generate ticket.</p>
             <input type="text" id="new-guest-name" placeholder="Guest Full Name">
             <button class="btn" style="background: var(--primary); color: white;" onclick="addGuest()">Generate Ticket</button>
         </div>
@@ -294,7 +302,7 @@
         for (let i = 0; i < 6; i++) {
             randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
         }
-        const id = 'GP-' + randomStr;
+        const id = 'XMAS-' + randomStr;
 
         const newGuest = {
             id: id,
@@ -329,14 +337,15 @@
         filtered.forEach(guest => {
             const div = document.createElement('div');
             div.className = 'guest-card';
+            if(guest.checkedIn) div.style.borderLeft = '4px solid var(--green)';
             div.onclick = () => openTicket(guest.id);
             div.innerHTML = `
                 <div class="guest-info">
                     <h3>${guest.name}</h3>
-                    <p>ID: ${guest.id}</p>
+                    <p>${guest.id}</p>
                 </div>
                 <div class="status-badge ${guest.checkedIn ? 'status-in' : 'status-out'}">
-                    ${guest.checkedIn ? 'Checked In' : 'Not Here'}
+                    ${guest.checkedIn ? 'In Party' : 'Not Here'}
                 </div>
             `;
             container.appendChild(div);
@@ -359,8 +368,8 @@
         qrContainer.innerHTML = "";
         new QRCode(qrContainer, {
             text: guest.id,
-            width: 160, // Slightly smaller to fit card
-            height: 160,
+            width: 150, 
+            height: 150,
             colorDark : "#1e293b",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
@@ -378,11 +387,11 @@
         if (guest.checkedIn) {
             btn.innerText = "Undo Check In";
             btn.style.background = "#94a3b8"; 
-            statusTxt.innerHTML = `<span style="color:#15803d; font-weight:bold;">✔ CHECKED IN</span>`;
+            statusTxt.innerHTML = `<span style="color:var(--green); font-weight:bold;">✔ 已签到 (CHECKED IN)</span>`;
         } else {
             btn.innerText = "Check In Guest";
-            btn.style.background = "var(--success)";
-            statusTxt.innerHTML = `<span style="color:#94a3b8; font-weight:bold;">NOT CHECKED IN</span>`;
+            btn.style.background = "var(--green)";
+            statusTxt.innerHTML = `<span style="color:#ef4444; font-weight:bold;">未签到 (NOT CHECKED IN)</span>`;
         }
     }
 
@@ -400,7 +409,7 @@
     }
 
     function deleteGuest() {
-        if(confirm('Are you sure you want to remove this guest permanently?')) {
+        if(confirm('Delete this guest?')) {
             guests = guests.filter(g => g.id !== currentGuestId);
             saveTabs();
             closeModal('ticket-modal');
@@ -413,7 +422,7 @@
         document.getElementById('edit-area').style.display = 'block';
         document.querySelector('.modal-actions').style.display = 'none';
         
-        // Scroll to bottom of modal
+        // Scroll to bottom
         const modalContainer = document.querySelector('.modal-scroll-container');
         setTimeout(() => modalContainer.scrollTop = modalContainer.scrollHeight, 100);
     }
@@ -494,7 +503,7 @@
         } else {
             feedback.style.background = "white";
             feedback.style.color = "#333";
-            feedback.innerHTML = `❌ Invalid Ticket ID: ${decodedText}`;
+            feedback.innerHTML = `❌ Invalid Ticket ID`;
         }
 
         feedback.style.display = 'block';
