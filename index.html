@@ -96,28 +96,28 @@
         .guest-name-large { font-size: 26px; font-weight: 800; color: var(--text); margin: 0 0 5px 0; line-height: 1.2; }
         .guest-label { font-size: 12px; text-transform: uppercase; color: var(--primary); font-weight: bold; letter-spacing: 1px; margin-bottom: 15px; opacity: 0.8; }
 
-        #qrcode { margin: 15px auto 20px auto; display: flex; justify-content: center; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: fit-content; border: 1px solid #f1f5f9; }
+        #qrcode { margin: 15px auto 25px auto; display: flex; justify-content: center; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: fit-content; border: 1px solid #f1f5f9; }
         #qrcode img { display: block; }
 
-        .ticket-id-display { font-family: monospace; font-size: 14px; color: #64748b; margin-bottom: 5px; background: #f8fafc; padding: 6px 12px; border-radius: 6px; display: inline-block; border: 1px dashed #cbd5e1; }
-
-        /* Dashed Line / Tear-off effect */
-        .ticket-divider {
-            height: 20px;
-            width: 100%;
-            background: radial-gradient(circle, transparent 8px, #ffffff 8px) 0 0 / 24px 24px repeat-x,
-                        linear-gradient(#f1f5f9 0%, #f1f5f9 100%);
-            background-blend-mode: destination-out;
-            background-color: #fdf2f2; /* Footer color matches bg */
-            position: relative;
+        /* NEW INFO SECTION STYLES */
+        .ticket-details {
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 15px;
             margin-top: 10px;
         }
-        /* Little notches on side */
-        .ticket-pass::before, .ticket-pass::after {
-            content: ''; position: absolute; top: 68%; width: 20px; height: 20px; background: rgba(0,0,0,0.7); border-radius: 50%; z-index: 10;
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #475569;
+            font-size: 15px;
+            font-weight: 500;
         }
-        .ticket-pass::before { left: -10px; }
-        .ticket-pass::after { right: -10px; }
+        .info-icon { opacity: 0.7; }
+        .info-highlight { color: var(--primary); font-weight: 600; letter-spacing: 0.5px; }
+
 
         .ticket-footer {
             background: #fdf2f2;
@@ -216,8 +216,18 @@
                     
                     <div id="qrcode"></div>
                     
-                    <div style="font-size:10px; color:#94a3b8; text-transform:uppercase;">入场码 (Entry Code)</div>
-                    <div class="ticket-id-display" id="t-id">ID-000000</div>
+                    <!-- UPDATED INFO SECTION -->
+                    <div class="ticket-details">
+                        <div class="info-row">
+                            <span class="info-icon">📅</span>
+                            <span>2025/12/27</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">📞</span>
+                            <span class="info-highlight">139 5179 3391</span>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="ticket-footer">
                     <div id="t-status"></div>
@@ -359,7 +369,7 @@
 
         currentGuestId = id;
         document.getElementById('t-name').innerText = guest.name;
-        document.getElementById('t-id').innerText = guest.id;
+        // NOTE: We no longer display the ID text on the ticket card, so we don't update it here.
         
         updateTicketStatusUI(guest);
         
