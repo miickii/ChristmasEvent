@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GuestPass Event</title>
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/2563eb/white?text=GP">
+    
+    <!-- Libraries for QR Generation and Scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+
+        /* Navigation */
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { background: none; border: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; color: #64748b; width: 50%; }
+        .nav-btn.active { color: var(--primary); font-weight: 600; }
+        .nav-icon { font-size: 24px; margin-bottom: 4px; }
+
+        /* Views */
+        .view { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .view.active { display: block; }
+
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 24px; }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+
+        /* Guest List */
+        .guest-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .guest-info h3 { margin: 0 0 4px 0; font-size: 16px; }
+        .guest-info p { margin: 0; font-size: 12px; color: #64748b; font-family: monospace; }
+        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .status-in { background: #dcfce7; color: #15803d; }
+        .status-out { background: #f1f5f9; color: #64748b; }
+
+        /* Modal / Ticket View */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; pading: 20px; }
+        .modal.open { display: flex; }
+        .modal-content { background: var(--card); width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+        
+        #qrcode { margin: 20px auto; display: flex; justify-content: center; }
+        #qrcode img { border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn { padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; width: 100%; }
+        .btn-checkin { background: var(--success); color: white; grid-column: span 2; }
+        .btn-delete { background: #fee2e2; color: var(--danger); }
+        .btn-edit { background: #f1f5f9; color: var(--text); }
+
+        /* Scanner */
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; background: black; }
+        .scan-result { margin-top: 20px; padding: 15px; background: #dcfce7; border-radius: 12px; color: #14532d; text-align: center; display: none; }
+        
+        /* Inputs */
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 16px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- NAV BAR -->
+    <nav>
+        <button class="nav-btn active" onclick="switchTab('list')">
+            <span class="nav-icon">📋</span>
+            <span>Guests</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('scan')">
+            <span class="nav-icon">📷</span>
+            <span>Scan</span>
+        </button>
+    </nav>
+
+    <!-- GUEST LIST VIEW -->
+    <div id="view-list" class="view active">
+        <header>
+            <h1>Guest List <span id="count" style="font-size: 14px; color: #64748b; font-weight: normal;">(0)</span></h1>
+            <button class="btn-add" onclick="openAddModal()">+ Add</button>
+        </header>
+        
+        <input type="text" id="search" placeholder="Search guests..." onkeyup="renderGuests()">
+        <div id="guest-container">
+            <!-- Guests rendered here -->
+        </div>
+    </div>
+
+    <!-- SCANNER VIEW -->
+    <div id="view-scan" class="view">
+        <header>
+            <h1>Scanner</h1>
+        </header>
+        <div id="reader"></div>
+        <div id="scan-feedback" class="scan-result"></div>
+        <button id="stop-scan-btn" class="btn" style="background:#f1f5f9; margin-top:10px; display:none;" onclick="stopScanner()">Stop Camera</button>
+    </div>
+
+    <!-- TICKET / EDIT MODAL -->
+    <div id="ticket-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('ticket-modal')">&times;</button>
+            
+            <h2 id="t-name">Guest Name</h2>
+            <p id="t-id" style="color:#64748b; font-family:monospace;"></p>
+            <div id="t-status" style="margin-bottom:10px;"></div>
+
+            <div id="qrcode"></div>
+            <p style="font-size:12px; color:#94a3b8;">Take a screenshot of this screen to save ticket.</p>
+
+            <div class="action-grid">
+                <button class="btn btn-checkin" id="btn-toggle-status" onclick="toggleCheckIn()">Check In</button>
+                <button class="btn btn-edit" onclick="enableEditMode()">Edit Name</button>
+                <button class="btn btn-delete" onclick="deleteGuest()">Remove</button>
+            </div>
+
+            <!-- Hidden Edit Field -->
+            <div id="edit-area" style="display:none; margin-top:15px; border-top:1px solid #eee; padding-top:15px;">
+                <input type="text" id="edit-name-input">
+                <button class="btn" style="background:var(--primary); color:white;" onclick="saveEdit()">Save Name</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD GUEST MODAL -->
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('add-modal')">&times;</button>
+            <h2>Add Guest</h2>
+            <input type="text" id="new-guest-name" placeholder="Full Name">
+            <button class="btn" style="background: var(--primary); color: white;" onclick="addGuest()">Generate Ticket</button>
+        </div>
+    </div>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    let guests = JSON.parse(localStorage.getItem('gp_guests')) || [];
+    let currentGuestId = null;
+    let html5QrCode = null;
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        renderGuests();
+    });
+
+    function saveTabs() {
+        localStorage.setItem('gp_guests', JSON.stringify(guests));
+        renderGuests();
+    }
+
+    // --- NAVIGATION ---
+    function switchTab(tab) {
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(`view-${tab}`).classList.add('active');
+        
+        // Find button index to highlight
+        const btns = document.querySelectorAll('.nav-btn');
+        if(tab === 'list') btns[0].classList.add('active');
+        if(tab === 'scan') {
+            btns[1].classList.add('active');
+            startScanner();
+        } else {
+            stopScanner();
+        }
+    }
+
+    // --- GUEST LOGIC ---
+    function addGuest() {
+        const nameInput = document.getElementById('new-guest-name');
+        const name = nameInput.value.trim();
+        if (!name) return alert("Please enter a name");
+
+        // Generate ID: simple random string + timestamp
+        const id = 'GP-' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000);
+
+        const newGuest = {
+            id: id,
+            name: name,
+            checkedIn: false,
+            timestamp: new Date().toISOString()
+        };
+
+        guests.unshift(newGuest); // Add to top
+        saveTabs();
+        
+        nameInput.value = '';
+        closeModal('add-modal');
+        openTicket(id); // Immediately show ticket
+    }
+
+    function renderGuests() {
+        const container = document.getElementById('guest-container');
+        const search = document.getElementById('search').value.toLowerCase();
+        
+        container.innerHTML = '';
+        document.getElementById('count').innerText = `(${guests.length})`;
+
+        const filtered = guests.filter(g => g.name.toLowerCase().includes(search) || g.id.toLowerCase().includes(search));
+
+        filtered.forEach(guest => {
+            const div = document.createElement('div');
+            div.className = 'guest-card';
+            div.onclick = () => openTicket(guest.id);
+            div.innerHTML = `
+                <div class="guest-info">
+                    <h3>${guest.name}</h3>
+                    <p>ID: ${guest.id}</p>
+                </div>
+                <div class="status-badge ${guest.checkedIn ? 'status-in' : 'status-out'}">
+                    ${guest.checkedIn ? 'Checked In' : 'Not Here'}
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // --- TICKET VIEW & ACTIONS ---
+    function openTicket(id) {
+        const guest = guests.find(g => g.id === id);
+        if(!guest) return;
+
+        currentGuestId = id;
+        document.getElementById('t-name').innerText = guest.name;
+        document.getElementById('t-id').innerText = guest.id;
+        
+        updateTicketStatusUI(guest);
+        
+        // Generate QR
+        document.getElementById('qrcode').innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), {
+            text: guest.id, // The QR just contains the ID
+            width: 200,
+            height: 200
+        });
+
+        // Reset edit view
+        document.getElementById('edit-area').style.display = 'none';
+        
+        document.getElementById('ticket-modal').classList.add('open');
+    }
+
+    function updateTicketStatusUI(guest) {
+        const btn = document.getElementById('btn-toggle-status');
+        const statusTxt = document.getElementById('t-status');
+        
+        if (guest.checkedIn) {
+            btn.innerText = "Undo Check In";
+            btn.style.background = "#94a3b8"; // grey
+            statusTxt.innerHTML = `<span class="status-badge status-in">CHECKED IN</span>`;
+        } else {
+            btn.innerText = "Check In Guest";
+            btn.style.background = "var(--success)";
+            statusTxt.innerHTML = `<span class="status-badge status-out">NOT CHECKED IN</span>`;
+        }
+    }
+
+    function toggleCheckIn(targetId = null) {
+        const idToProcess = targetId || currentGuestId;
+        const guest = guests.find(g => g.id === idToProcess);
+        if(guest) {
+            guest.checkedIn = !guest.checkedIn;
+            saveTabs();
+            // If modal is open, update it
+            if(document.getElementById('ticket-modal').classList.contains('open')) {
+                updateTicketStatusUI(guest);
+            }
+            return guest; // Return for scanner feedback
+        }
+    }
+
+    function deleteGuest() {
+        if(confirm('Are you sure you want to remove this guest permanently?')) {
+            guests = guests.filter(g => g.id !== currentGuestId);
+            saveTabs();
+            closeModal('ticket-modal');
+        }
+    }
+
+    function enableEditMode() {
+        const guest = guests.find(g => g.id === currentGuestId);
+        document.getElementById('edit-name-input').value = guest.name;
+        document.getElementById('edit-area').style.display = 'block';
+    }
+
+    function saveEdit() {
+        const newName = document.getElementById('edit-name-input').value;
+        if(newName) {
+            const guest = guests.find(g => g.id === currentGuestId);
+            guest.name = newName;
+            saveTabs();
+            document.getElementById('t-name').innerText = newName;
+            document.getElementById('edit-area').style.display = 'none';
+        }
+    }
+
+    // --- MODAL UTILS ---
+    function openAddModal() {
+        document.getElementById('add-modal').classList.add('open');
+        document.getElementById('new-guest-name').focus();
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+
+    // --- SCANNER LOGIC ---
+    function startScanner() {
+        // Prevent starting if already running
+        if(html5QrCode && html5QrCode.isScanning) return;
+
+        const scanFeedback = document.getElementById('scan-feedback');
+        scanFeedback.style.display = 'none';
+
+        html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        
+        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+        .catch(err => {
+            console.log("Camera error", err);
+            document.getElementById('reader').innerHTML = `<p style="color:white; padding:20px; text-align:center;">Camera access denied or unavailable.<br>Ensure you are using HTTPS.</p>`;
+        });
+        
+        document.getElementById('stop-scan-btn').style.display = 'block';
+    }
+
+    function stopScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                html5QrCode.clear();
+                html5QrCode = null;
+            }).catch(err => console.log(err));
+        }
+        document.getElementById('stop-scan-btn').style.display = 'none';
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Pause to prevent rapid double scanning
+        html5QrCode.pause();
+
+        const guest = guests.find(g => g.id === decodedText);
+        const feedback = document.getElementById('scan-feedback');
+        
+        if (guest) {
+            if (guest.checkedIn) {
+                 feedback.style.background = "#fee2e2"; // Red bg
+                 feedback.style.color = "#b91c1c";
+                 feedback.innerHTML = `⚠️ <strong>${guest.name}</strong> is ALREADY checked in!`;
+            } else {
+                // Check them in
+                guest.checkedIn = true;
+                saveTabs();
+                feedback.style.background = "#dcfce7"; // Green bg
+                feedback.style.color = "#15803d";
+                feedback.innerHTML = `✅ <strong>${guest.name}</strong> Checked In Successfully!`;
+            }
+        } else {
+            feedback.style.background = "#f1f5f9";
+            feedback.style.color = "#333";
+            feedback.innerHTML = `❌ Invalid Ticket ID: ${decodedText}`;
+        }
+
+        feedback.style.display = 'block';
+
+        // Resume scanning after 2 seconds
+        setTimeout(() => {
+            feedback.style.display = 'none';
+            html5QrCode.resume();
+        }, 2500);
+    }
+
+</script>
+</body>
+</html>
