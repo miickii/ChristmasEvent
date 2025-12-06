@@ -14,61 +14,135 @@
 
     <style>
         :root {
-            --primary: #2563eb;
+            --primary: #2563eb; /* Brand Blue */
+            --dark: #1e293b;
             --danger: #ef4444;
             --success: #22c55e;
             --bg: #f8fafc;
             --card: #ffffff;
-            --text: #1e293b;
+            --text: #334155;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
 
         /* Navigation */
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-btn { background: none; border: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; color: #64748b; width: 50%; }
-        .nav-btn.active { color: var(--primary); font-weight: 600; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; padding: 10px 0 30px 0; z-index: 1000; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+        .nav-btn { background: none; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; color: #94a3b8; width: 50%; font-weight: 500; letter-spacing: 0.5px; }
+        .nav-btn.active { color: var(--primary); }
         .nav-icon { font-size: 24px; margin-bottom: 4px; }
 
         /* Views */
-        .view { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .view { display: none; padding: 20px; max-width: 600px; margin: 0 auto; animation: fadeIn 0.2s ease; }
         .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Header */
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h1 { margin: 0; font-size: 24px; }
-        .btn-add { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-top: 10px; }
+        h1 { margin: 0; font-size: 28px; letter-spacing: -0.5px; color: var(--dark); }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: transform 0.1s; }
+        .btn-add:active { transform: scale(0.95); }
 
         /* Guest List */
-        .guest-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .guest-info h3 { margin: 0 0 4px 0; font-size: 16px; }
-        .guest-info p { margin: 0; font-size: 12px; color: #64748b; font-family: monospace; }
-        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .guest-card { background: var(--card); padding: 16px 20px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid transparent; transition: background 0.2s; }
+        .guest-card:active { background: #f1f5f9; }
+        .guest-info h3 { margin: 0 0 4px 0; font-size: 17px; color: var(--dark); }
+        .guest-info p { margin: 0; font-size: 13px; color: #94a3b8; font-family: monospace; letter-spacing: 0.5px; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .status-in { background: #dcfce7; color: #15803d; }
-        .status-out { background: #f1f5f9; color: #64748b; }
+        .status-out { background: #f1f5f9; color: #94a3b8; }
 
-        /* Modal / Ticket View */
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; pading: 20px; }
+        /* --- THE NEW TICKET STYLES --- */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
         .modal.open { display: flex; }
-        .modal-content { background: var(--card); width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
-        .close-modal { position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 20px; cursor: pointer; }
         
-        #qrcode { margin: 20px auto; display: flex; justify-content: center; }
-        #qrcode img { border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .modal-scroll-container { width: 100%; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+
+        /* The Official Ticket Card */
+        .ticket-pass {
+            background: white;
+            width: 100%;
+            max-width: 340px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .ticket-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+        .ticket-header h2 { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; }
         
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .btn { padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; width: 100%; }
-        .btn-checkin { background: var(--success); color: white; grid-column: span 2; }
-        .btn-delete { background: #fee2e2; color: var(--danger); }
-        .btn-edit { background: #f1f5f9; color: var(--text); }
+        .ticket-body {
+            padding: 30px 20px 20px 20px;
+            background: white;
+            position: relative;
+        }
+
+        .guest-name-large { font-size: 24px; font-weight: 800; color: var(--dark); margin: 0 0 5px 0; line-height: 1.2; }
+        .guest-label { font-size: 12px; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 1px; margin-bottom: 20px; }
+
+        #qrcode { margin: 10px auto 20px auto; display: flex; justify-content: center; }
+        #qrcode img { display: block; } /* Remove border/shadow for cleaner look */
+
+        .ticket-id-display { font-family: monospace; font-size: 16px; color: #64748b; letter-spacing: 2px; margin-bottom: 5px; background: #f8fafc; padding: 8px 15px; border-radius: 8px; display: inline-block; }
+
+        /* Dashed Line / Tear-off effect */
+        .ticket-divider {
+            height: 20px;
+            width: 100%;
+            background: radial-gradient(circle, transparent 8px, #ffffff 8px) 0 0 / 24px 24px repeat-x,
+                        linear-gradient(#f1f5f9 0%, #f1f5f9 100%);
+            background-blend-mode: destination-out;
+            background-color: #f8fafc; /* Footer color */
+            position: relative;
+            margin-top: 10px;
+        }
+        /* Little notches on side */
+        .ticket-pass::before, .ticket-pass::after {
+            content: ''; position: absolute; top: 68%; width: 20px; height: 20px; background: rgba(0,0,0,0.6); border-radius: 50%; z-index: 10;
+        }
+        .ticket-pass::before { left: -10px; }
+        .ticket-pass::after { right: -10px; }
+
+        .ticket-footer {
+            background: #f8fafc;
+            padding: 15px;
+            border-top: 2px dashed #cbd5e1;
+        }
+        .ticket-footer p { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin: 0; }
+        .checkin-status-text { font-size: 12px; margin-top: 5px; font-weight: bold; }
+
+        /* Close Button (Floating outside) */
+        .close-modal-btn { position: absolute; top: 15px; right: 15px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 2002; display: flex; align-items: center; justify-content: center; color: var(--dark); }
+
+        /* Action Buttons */
+        .modal-actions { width: 100%; max-width: 340px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; width: 100%; font-size: 14px; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-checkin { background: var(--success); color: white; grid-column: span 2; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
+        .btn-delete { background: white; color: var(--danger); border: 1px solid #fee2e2; }
+        .btn-edit { background: white; color: var(--dark); border: 1px solid #e2e8f0; }
+
+        /* Edit Input Area */
+        .edit-container { background: white; padding: 20px; border-radius: 16px; margin-top: 15px; width: 100%; max-width: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: none; }
 
         /* Scanner */
-        #reader { width: 100%; border-radius: 12px; overflow: hidden; background: black; }
-        .scan-result { margin-top: 20px; padding: 15px; background: #dcfce7; border-radius: 12px; color: #14532d; text-align: center; display: none; }
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: black; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .scan-result { margin-top: 20px; padding: 15px; background: #dcfce7; border-radius: 12px; color: #14532d; text-align: center; display: none; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
         /* Inputs */
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 16px; }
+        input { width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: var(--primary); }
+
+        /* Simple Modal for Add */
+        .simple-modal-content { background: var(--card); width: 90%; max-width: 400px; padding: 30px; border-radius: 24px; text-align: center; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
 
     </style>
 </head>
@@ -78,69 +152,99 @@
     <nav>
         <button class="nav-btn active" onclick="switchTab('list')">
             <span class="nav-icon">📋</span>
-            <span>Guests</span>
+            <span>Guest List</span>
         </button>
         <button class="nav-btn" onclick="switchTab('scan')">
             <span class="nav-icon">📷</span>
-            <span>Scan</span>
+            <span>Scanner</span>
         </button>
     </nav>
 
     <!-- GUEST LIST VIEW -->
     <div id="view-list" class="view active">
         <header>
-            <h1>Guest List <span id="count" style="font-size: 14px; color: #64748b; font-weight: normal;">(0)</span></h1>
-            <button class="btn-add" onclick="openAddModal()">+ Add</button>
+            <h1>Events <span id="count" style="font-size: 16px; color: #94a3b8; font-weight: normal; vertical-align: middle;">(0)</span></h1>
+            <button class="btn-add" onclick="openAddModal()">+ New Guest</button>
         </header>
         
-        <input type="text" id="search" placeholder="Search guests..." onkeyup="renderGuests()">
+        <input type="text" id="search" placeholder="Search name or ID..." onkeyup="renderGuests()">
         <div id="guest-container">
             <!-- Guests rendered here -->
+        </div>
+        
+        <!-- Empty State -->
+        <div id="empty-state" style="text-align: center; margin-top: 50px; display: none; color: #94a3b8;">
+            <p style="font-size: 40px; margin-bottom: 10px;">🎟️</p>
+            <p>No guests yet.</p>
         </div>
     </div>
 
     <!-- SCANNER VIEW -->
     <div id="view-scan" class="view">
         <header>
-            <h1>Scanner</h1>
+            <h1>Check-In Scanner</h1>
         </header>
-        <div id="reader"></div>
+        <div style="position: relative;">
+            <div id="reader"></div>
+            <!-- Overlay guide -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 50px solid rgba(0,0,0,0.5); pointer-events: none; border-radius: 20px;"></div>
+        </div>
         <div id="scan-feedback" class="scan-result"></div>
-        <button id="stop-scan-btn" class="btn" style="background:#f1f5f9; margin-top:10px; display:none;" onclick="stopScanner()">Stop Camera</button>
+        <button id="stop-scan-btn" class="btn" style="background:white; color: #64748b; margin-top:20px; display:none;" onclick="stopScanner()">Stop Camera</button>
     </div>
 
-    <!-- TICKET / EDIT MODAL -->
+    <!-- TICKET MODAL (THE NEW OFFICIAL LOOK) -->
     <div id="ticket-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('ticket-modal')">&times;</button>
-            
-            <h2 id="t-name">Guest Name</h2>
-            <p id="t-id" style="color:#64748b; font-family:monospace;"></p>
-            <div id="t-status" style="margin-bottom:10px;"></div>
+        <button class="close-modal-btn" onclick="closeModal('ticket-modal')">&times;</button>
+        
+        <div class="modal-scroll-container">
+            <!-- The Visual Ticket Card -->
+            <div class="ticket-pass" id="ticket-visual">
+                <div class="ticket-header">
+                    <h2>Event Access Pass</h2>
+                </div>
+                <div class="ticket-body">
+                    <div class="guest-label">Authorized Guest</div>
+                    <div class="guest-name-large" id="t-name">Guest Name</div>
+                    
+                    <div id="qrcode"></div>
+                    
+                    <div class="ticket-id-display" id="t-id">ID-000000</div>
+                </div>
+                <div class="ticket-footer">
+                    <div id="t-status"></div>
+                    <p style="margin-top: 5px;">Admit One • Non-Transferable</p>
+                </div>
+            </div>
 
-            <div id="qrcode"></div>
-            <p style="font-size:12px; color:#94a3b8;">Take a screenshot of this screen to save ticket.</p>
+            <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom: 15px;">Screenshot the card above to send to guest.</p>
 
-            <div class="action-grid">
+            <!-- Actions -->
+            <div class="modal-actions">
                 <button class="btn btn-checkin" id="btn-toggle-status" onclick="toggleCheckIn()">Check In</button>
                 <button class="btn btn-edit" onclick="enableEditMode()">Edit Name</button>
                 <button class="btn btn-delete" onclick="deleteGuest()">Remove</button>
             </div>
 
-            <!-- Hidden Edit Field -->
-            <div id="edit-area" style="display:none; margin-top:15px; border-top:1px solid #eee; padding-top:15px;">
+            <!-- Edit Field -->
+            <div id="edit-area" class="edit-container">
+                <h3 style="margin-top:0;">Update Name</h3>
                 <input type="text" id="edit-name-input">
-                <button class="btn" style="background:var(--primary); color:white;" onclick="saveEdit()">Save Name</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" style="background:#e2e8f0; color:var(--dark);" onclick="cancelEdit()">Cancel</button>
+                    <button class="btn" style="background:var(--primary); color:white;" onclick="saveEdit()">Save</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- ADD GUEST MODAL -->
     <div id="add-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('add-modal')">&times;</button>
-            <h2>Add Guest</h2>
-            <input type="text" id="new-guest-name" placeholder="Full Name">
+        <div class="simple-modal-content">
+            <button class="close-modal-btn" style="top: -15px; right: -15px;" onclick="closeModal('add-modal')">&times;</button>
+            <h2 style="margin-top:0;">Add Guest</h2>
+            <p style="color:#64748b; font-size: 14px; margin-bottom: 20px;">Enter the full name to generate a unique ticket.</p>
+            <input type="text" id="new-guest-name" placeholder="Guest Full Name">
             <button class="btn" style="background: var(--primary); color: white;" onclick="addGuest()">Generate Ticket</button>
         </div>
     </div>
@@ -168,7 +272,6 @@
         
         document.getElementById(`view-${tab}`).classList.add('active');
         
-        // Find button index to highlight
         const btns = document.querySelectorAll('.nav-btn');
         if(tab === 'list') btns[0].classList.add('active');
         if(tab === 'scan') {
@@ -185,8 +288,13 @@
         const name = nameInput.value.trim();
         if (!name) return alert("Please enter a name");
 
-        // Generate ID: simple random string + timestamp
-        const id = 'GP-' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000);
+        // Random readable ID
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let randomStr = '';
+        for (let i = 0; i < 6; i++) {
+            randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const id = 'GP-' + randomStr;
 
         const newGuest = {
             id: id,
@@ -195,12 +303,12 @@
             timestamp: new Date().toISOString()
         };
 
-        guests.unshift(newGuest); // Add to top
+        guests.unshift(newGuest); 
         saveTabs();
         
         nameInput.value = '';
         closeModal('add-modal');
-        openTicket(id); // Immediately show ticket
+        openTicket(id); 
     }
 
     function renderGuests() {
@@ -211,6 +319,12 @@
         document.getElementById('count').innerText = `(${guests.length})`;
 
         const filtered = guests.filter(g => g.name.toLowerCase().includes(search) || g.id.toLowerCase().includes(search));
+
+        if(filtered.length === 0 && !search) {
+            document.getElementById('empty-state').style.display = 'block';
+        } else {
+            document.getElementById('empty-state').style.display = 'none';
+        }
 
         filtered.forEach(guest => {
             const div = document.createElement('div');
@@ -241,16 +355,19 @@
         updateTicketStatusUI(guest);
         
         // Generate QR
-        document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), {
-            text: guest.id, // The QR just contains the ID
-            width: 200,
-            height: 200
+        const qrContainer = document.getElementById("qrcode");
+        qrContainer.innerHTML = "";
+        new QRCode(qrContainer, {
+            text: guest.id,
+            width: 160, // Slightly smaller to fit card
+            height: 160,
+            colorDark : "#1e293b",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
         });
 
         // Reset edit view
-        document.getElementById('edit-area').style.display = 'none';
-        
+        cancelEdit();
         document.getElementById('ticket-modal').classList.add('open');
     }
 
@@ -260,12 +377,12 @@
         
         if (guest.checkedIn) {
             btn.innerText = "Undo Check In";
-            btn.style.background = "#94a3b8"; // grey
-            statusTxt.innerHTML = `<span class="status-badge status-in">CHECKED IN</span>`;
+            btn.style.background = "#94a3b8"; 
+            statusTxt.innerHTML = `<span style="color:#15803d; font-weight:bold;">✔ CHECKED IN</span>`;
         } else {
             btn.innerText = "Check In Guest";
             btn.style.background = "var(--success)";
-            statusTxt.innerHTML = `<span class="status-badge status-out">NOT CHECKED IN</span>`;
+            statusTxt.innerHTML = `<span style="color:#94a3b8; font-weight:bold;">NOT CHECKED IN</span>`;
         }
     }
 
@@ -275,11 +392,10 @@
         if(guest) {
             guest.checkedIn = !guest.checkedIn;
             saveTabs();
-            // If modal is open, update it
             if(document.getElementById('ticket-modal').classList.contains('open')) {
                 updateTicketStatusUI(guest);
             }
-            return guest; // Return for scanner feedback
+            return guest;
         }
     }
 
@@ -295,6 +411,16 @@
         const guest = guests.find(g => g.id === currentGuestId);
         document.getElementById('edit-name-input').value = guest.name;
         document.getElementById('edit-area').style.display = 'block';
+        document.querySelector('.modal-actions').style.display = 'none';
+        
+        // Scroll to bottom of modal
+        const modalContainer = document.querySelector('.modal-scroll-container');
+        setTimeout(() => modalContainer.scrollTop = modalContainer.scrollHeight, 100);
+    }
+
+    function cancelEdit() {
+        document.getElementById('edit-area').style.display = 'none';
+        document.querySelector('.modal-actions').style.display = 'grid';
     }
 
     function saveEdit() {
@@ -304,7 +430,7 @@
             guest.name = newName;
             saveTabs();
             document.getElementById('t-name').innerText = newName;
-            document.getElementById('edit-area').style.display = 'none';
+            cancelEdit();
         }
     }
 
@@ -320,19 +446,18 @@
 
     // --- SCANNER LOGIC ---
     function startScanner() {
-        // Prevent starting if already running
         if(html5QrCode && html5QrCode.isScanning) return;
 
         const scanFeedback = document.getElementById('scan-feedback');
         scanFeedback.style.display = 'none';
 
         html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
         
         html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
         .catch(err => {
             console.log("Camera error", err);
-            document.getElementById('reader').innerHTML = `<p style="color:white; padding:20px; text-align:center;">Camera access denied or unavailable.<br>Ensure you are using HTTPS.</p>`;
+            document.getElementById('reader').innerHTML = `<p style="color:white; padding:40px; text-align:center;">Camera access denied or unavailable.<br>Ensure you are using HTTPS.</p>`;
         });
         
         document.getElementById('stop-scan-btn').style.display = 'block';
@@ -349,7 +474,6 @@
     }
 
     function onScanSuccess(decodedText, decodedResult) {
-        // Pause to prevent rapid double scanning
         html5QrCode.pause();
 
         const guest = guests.find(g => g.id === decodedText);
@@ -357,26 +481,24 @@
         
         if (guest) {
             if (guest.checkedIn) {
-                 feedback.style.background = "#fee2e2"; // Red bg
+                 feedback.style.background = "#fee2e2"; 
                  feedback.style.color = "#b91c1c";
                  feedback.innerHTML = `⚠️ <strong>${guest.name}</strong> is ALREADY checked in!`;
             } else {
-                // Check them in
                 guest.checkedIn = true;
                 saveTabs();
-                feedback.style.background = "#dcfce7"; // Green bg
+                feedback.style.background = "#dcfce7"; 
                 feedback.style.color = "#15803d";
                 feedback.innerHTML = `✅ <strong>${guest.name}</strong> Checked In Successfully!`;
             }
         } else {
-            feedback.style.background = "#f1f5f9";
+            feedback.style.background = "white";
             feedback.style.color = "#333";
             feedback.innerHTML = `❌ Invalid Ticket ID: ${decodedText}`;
         }
 
         feedback.style.display = 'block';
 
-        // Resume scanning after 2 seconds
         setTimeout(() => {
             feedback.style.display = 'none';
             html5QrCode.resume();
